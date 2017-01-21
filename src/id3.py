@@ -7,42 +7,47 @@ DtNode = namedtuple("DtNode", "fVal, nPosNeg, gain, left, right")
 
 POS_CLASS = 'e'
 
-def InformationGain(data, f):
-    #TODO: compute information gain of this dataset after splitting on feature F
+
+def information_gain(data, f):
+    # TODO: compute information gain of this dataset after splitting on feature F
     return 0
 
-def Classify(tree, instance):
-    if tree.left == None and tree.right == None:
+
+def classify(tree, instance):
+    if tree.left is None and tree.right is None:
         return tree.nPosNeg[0] > tree.nPosNeg[1]
     elif instance[tree.fVal.feature] == tree.fVal.value:
-        return Classify(tree.left, instance)
+        return classify(tree.left, instance)
     else:
-        return Classify(tree.right, instance)
+        return classify(tree.right, instance)
 
-def Accuracy(tree, data):
-    nCorrect = 0
+
+def accuracy(tree, data):
+    n_correct = 0
     for d in data:
-        if Classify(tree, d) == (d[0] == POS_CLASS):
-            nCorrect += 1
-    return float(nCorrect) / len(data)
+        if classify(tree, d) == (d[0] == POS_CLASS):
+            n_correct += 1
+    return float(n_correct) / len(data)
 
-def PrintTree(node, prefix=''):
+
+def print_tree(node, prefix=''):
     print("%s>%s\t%s\t%s" % (prefix, node.fVal, node.nPosNeg, node.gain))
-    if node.left != None:
-        PrintTree(node.left, prefix + '-')
-    if node.right != None:
-        PrintTree(node.right, prefix + '-')        
-        
-def ID3(data, features, MIN_GAIN=0.1):
-    #TODO: implement decision tree learning
+    if node.left is not None:
+        print_tree(node.left, prefix + '-')
+    if node.right is not None:
+        print_tree(node.right, prefix + '-')
+
+
+def id3(data, features, MIN_GAIN=0.1):
+    # TODO: implement decision tree learning
     return DtNode(FeatureVal(1,'x'), (100,0), 0, None, None)
 
 if __name__ == "__main__":
     train = MushroomData(sys.argv[1])
     dev = MushroomData(sys.argv[2])
 
-    dTree = ID3(train.data, train.features, MIN_GAIN=float(sys.argv[3]))
+    dTree = id3(train.data, train.features, MIN_GAIN=float(sys.argv[3]))
     
-    PrintTree(dTree)
+    print_tree(dTree)
 
-    print Accuracy(dTree, dev.data)
+    print accuracy(dTree, dev.data)

@@ -17,13 +17,29 @@ def information_gain(data, f):
     # look at entropy of node, split, and observe how much entropy is reduced
 
     # edible v poisonous is target for entropy
+    neg_total = 0.0
+    pos_total = 0.0
+    neg_data = []
+    pos_data = []
 
-    return
+    for mushroom in data:
+        if mushroom[f[0]] is f[0]:
+            neg_data.append(mushroom)
+            neg_total += 1
+        else:
+            pos_data.append(mushroom)
+            pos_total += 1
+
+
+    pos_prob = neg_total / len(data)
+    neg_prob = pos_total / len(data)
+
+    return entropy(data) - neg_prob * entropy(neg_data) - pos_prob * entropy(pos_data)
 
 
 def entropy(data):
-    pos_total = 0
-    neg_total = 0
+    pos_total = 0.0
+    neg_total = 0.0
 
     for mushroom in data:
         if mushroom[0] is 'e':
@@ -34,7 +50,7 @@ def entropy(data):
     pos_prob = pos_total / len(data)
     neg_prob = neg_total / len(data)
 
-    return -pos_prob*math.log(pos_prob, 2) - neg_prob*math.log(neg_prob, 2)
+    return -pos_prob * math.log(pos_prob, 2) - neg_prob * math.log(neg_prob, 2)
 
 
 def classify(tree, instance):

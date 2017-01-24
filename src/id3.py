@@ -10,23 +10,31 @@ POS_CLASS = 'e'
 
 def information_gain(data, f):
     # TODO: compute information gain of this dataset after splitting on feature F
-    f_total = 0.0
-    pos_f_total = 0.0
-
-    for mushroom in data:
-        if mushroom[f[0]] is f[1]:
-            pos_f_total += 1
-        f_total += 1
-
-    # frequency of desired feature
-    pos_f_freq = pos_f_total / f_total
-
-    # entropy of the given feature
-    h = (-pos_f_freq) * math.log(pos_f_freq, 2)
 
     # information gain after splitting on feature f
 
-    return h
+    # entropy of class distribution (ed/pos), not feature
+    # look at entropy of node, split, and observe how much entropy is reduced
+
+    # edible v poisonous is target for entropy
+
+    return
+
+
+def entropy(data):
+    pos_total = 0
+    neg_total = 0
+
+    for mushroom in data:
+        if mushroom[0] is 'e':
+            pos_total += 1
+        else:
+            neg_total += 1
+
+    pos_prob = pos_total / len(data)
+    neg_prob = neg_total / len(data)
+
+    return -pos_prob*math.log(pos_prob, 2) - neg_prob*math.log(neg_prob, 2)
 
 
 def classify(tree, instance):
@@ -59,12 +67,19 @@ def id3(data, features, MIN_GAIN=0.1):
     # maximum entropy
     max_h = 0.0
 
-    # find best feature
-    for f in features:
-        f_h = information_gain(data, f)
+    # base case edible v poisonous
+    # check if info gain is less than threshold
+    # entropy should naturally handle all cases
+    # no need to increase entropy after split if all edible or all poisonous
+    # set min info gain to zero --> grow whole tree
+    # entropy below threshold? return leaf node
+
+    # find best attribute
+    for attribute in features:
+        f_h = information_gain(data, attribute)
         if f_h > max_h:
             max_h = f_h
-            f_split = f
+            f_split = attribute
 
     return DtNode(FeatureVal(1,'x'), (100,0), 0, None, None)
 

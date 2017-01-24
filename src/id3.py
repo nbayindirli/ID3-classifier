@@ -10,7 +10,23 @@ POS_CLASS = 'e'
 
 def information_gain(data, f):
     # TODO: compute information gain of this dataset after splitting on feature F
-    return 0
+    f_total = 0.0
+    pos_f_total = 0.0
+
+    for mushroom in data:
+        if mushroom[f[0]] is f[1]:
+            pos_f_total += 1
+        f_total += 1
+
+    # frequency of desired feature
+    pos_f_freq = pos_f_total / f_total
+
+    # entropy of the given feature
+    h = (-pos_f_freq) * math.log(pos_f_freq, 2)
+
+    # information gain after splitting on feature f
+
+    return h
 
 
 def classify(tree, instance):
@@ -19,7 +35,7 @@ def classify(tree, instance):
     elif instance[tree.fVal.feature] == tree.fVal.value:
         return classify(tree.left, instance)
     else:
-        return classify(tree.right, instance)
+       return classify(tree.right, instance)
 
 
 def accuracy(tree, data):
@@ -40,7 +56,18 @@ def print_tree(node, prefix=''):
 
 def id3(data, features, MIN_GAIN=0.1):
     # TODO: implement decision tree learning
+    # maximum entropy
+    max_h = 0.0
+
+    # find best feature
+    for f in features:
+        f_h = information_gain(data, f)
+        if f_h > max_h:
+            max_h = f_h
+            f_split = f
+
     return DtNode(FeatureVal(1,'x'), (100,0), 0, None, None)
+
 
 if __name__ == "__main__":
     train = MushroomData(sys.argv[1])

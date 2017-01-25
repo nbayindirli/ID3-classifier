@@ -10,7 +10,47 @@ POS_CLASS = 'e'
 
 def information_gain(data, f):
     # TODO: compute information gain of this dataset after splitting on feature F
-    return 0
+
+    # information gain after splitting on feature f
+
+    # entropy of class distribution (ed/pos), not feature
+    # look at entropy of node, split, and observe how much entropy is reduced
+
+    # edible v poisonous is target for entropy
+    neg_total = 0.0
+    pos_total = 0.0
+    neg_data = []
+    pos_data = []
+
+    for mushroom in data:
+        if mushroom[f[0]] is f[0]:
+            neg_data.append(mushroom)
+            neg_total += 1
+        else:
+            pos_data.append(mushroom)
+            pos_total += 1
+
+
+    pos_prob = neg_total / len(data)
+    neg_prob = pos_total / len(data)
+
+    return entropy(data) - neg_prob * entropy(neg_data) - pos_prob * entropy(pos_data)
+
+
+def entropy(data):
+    pos_total = 0.0
+    neg_total = 0.0
+
+    for mushroom in data:
+        if mushroom[0] is 'e':
+            pos_total += 1
+        else:
+            neg_total += 1
+
+    pos_prob = pos_total / len(data)
+    neg_prob = neg_total / len(data)
+
+    return -pos_prob * math.log(pos_prob, 2) - neg_prob * math.log(neg_prob, 2)
 
 
 def classify(tree, instance):
@@ -19,7 +59,7 @@ def classify(tree, instance):
     elif instance[tree.fVal.feature] == tree.fVal.value:
         return classify(tree.left, instance)
     else:
-        return classify(tree.right, instance)
+       return classify(tree.right, instance)
 
 
 def accuracy(tree, data):
@@ -40,7 +80,25 @@ def print_tree(node, prefix=''):
 
 def id3(data, features, MIN_GAIN=0.1):
     # TODO: implement decision tree learning
+    # maximum entropy
+    max_h = 0.0
+
+    # base case edible v poisonous
+    # check if info gain is less than threshold
+    # entropy should naturally handle all cases
+    # no need to increase entropy after split if all edible or all poisonous
+    # set min info gain to zero --> grow whole tree
+    # entropy below threshold? return leaf node
+
+    # find best attribute
+    for attribute in features:
+        f_h = information_gain(data, attribute)
+        if f_h > max_h:
+            max_h = f_h
+            f_split = attribute
+
     return DtNode(FeatureVal(1,'x'), (100,0), 0, None, None)
+
 
 if __name__ == "__main__":
     train = MushroomData(sys.argv[1])

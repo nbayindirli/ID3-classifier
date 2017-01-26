@@ -98,7 +98,6 @@ def id3(data, features, MIN_GAIN=0.1):
             node.gain = info_gain
             node.fVal = f
 
-    # base case edible v poisonous
     # check if info gain is less than threshold
     # entropy should naturally handle all cases
     # no need to increase entropy after split if all edible or all poisonous

@@ -9,16 +9,12 @@ POS_CLASS = 'e'
 
 
 def information_gain(data, f):
-    # TODO: compute information gain of this dataset after splitting on feature F
 
-    # information gain after splitting on feature f
-
-    # entropy of class distribution (ed/pos), not feature
-    # look at entropy of node, split, and observe how much entropy is reduced
-
-    # edible v poisonous is target for entropy
+    # total of attribute
     neg_total = 0.0
     pos_total = 0.0
+
+    # lists of relevant mushrooms
     neg_data = []
     pos_data = []
 
@@ -30,14 +26,16 @@ def information_gain(data, f):
             pos_data.append(mushroom)
             pos_total += 1
 
+    pos_prob = pos_total / len(data)
+    neg_prob = neg_total / len(data)
 
-    pos_prob = neg_total / len(data)
-    neg_prob = pos_total / len(data)
-
+    # information gain equation
     return entropy(data) - neg_prob * entropy(neg_data) - pos_prob * entropy(pos_data)
 
 
 def entropy(data):
+
+    # total of edible and positive mushroom
     pos_total = 0.0
     neg_total = 0.0
 
@@ -47,9 +45,10 @@ def entropy(data):
         else:
             neg_total += 1
 
-    pos_prob = pos_total / len(data)
-    neg_prob = neg_total / len(data)
+    pos_prob = (pos_total + 1) / (len(data) + 2)
+    neg_prob = (neg_total + 1) / (len(data) + 2)
 
+    # entropy equation
     return -pos_prob * math.log(pos_prob, 2) - neg_prob * math.log(neg_prob, 2)
 
 
@@ -79,25 +78,45 @@ def print_tree(node, prefix=''):
 
 
 def id3(data, features, MIN_GAIN=0.1):
-    # TODO: implement decision tree learning
-    # maximum entropy
-    max_h = 0.0
+    node = DtNode
 
-    # base case edible v poisonous
+    # TODO: implement decision tree learning
+    node.fVal = namedtuple("FeatureVal", "feature, value")
+    node.nPosNeg = [0, 0]
+
+    # maximum information gain
+    node.gain = 0.0
+
+    # left and right DTNodes
+    node.left = []
+    node.right = []
+
+    # find feature of the highest information gain
+    for f in features:
+        info_gain = information_gain(data, f)
+        if node.gain < info_gain:
+            node.gain = info_gain
+            node.fVal = f
+
     # check if info gain is less than threshold
     # entropy should naturally handle all cases
     # no need to increase entropy after split if all edible or all poisonous
     # set min info gain to zero --> grow whole tree
     # entropy below threshold? return leaf node
 
-    # find best attribute
-    for attribute in features:
-        f_h = information_gain(data, attribute)
-        if f_h > max_h:
-            max_h = f_h
-            f_split = attribute
+    if node.gain < MIN_GAIN:
+        return DtNode(node.fVal[1], node.nPosNeg, node.gain, None, None)
+    else:
+        for mushroom in data:
+            if mushroom[node.fVal[0]] is node.fVal[1]:
+                node.left.append(mushroom)
+                node.nPosNeg[0] += 1
+            else:
+                node.right.append(mushroom)
+                node.nPosNeg[1] += 1
 
-    return DtNode(FeatureVal(1,'x'), (100,0), 0, None, None)
+    return DtNode(node.fVal[1], node.nPosNeg, node.gain, id3(node.left, features, MIN_GAIN),
+                  id3(node.right, features, MIN_GAIN))
 
 
 if __name__ == "__main__":

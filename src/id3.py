@@ -4,47 +4,51 @@ import math
 from Data import *
 
 DtNode = namedtuple("DtNode", "fVal, nPosNeg, gain, left, right")
-
+FeatureVal = namedtuple("FeatureVal", "feature, value")
 POS_CLASS = 'e'
 
 
 def information_gain(data, f):
 
     # total of attribute
-    neg_total = 0.0
-    pos_total = 0.0
+    l_data = 0.0
+    r_data = 0.0
 
-    # lists of relevant mushrooms
-    neg_data = []
-    pos_data = []
+    # lists of relevant items
+    left = []
+    right = []
 
-    for mushroom in data:
-        if mushroom[f[0]] is f[0]:
-            neg_data.append(mushroom)
-            neg_total += 1
+    # assess items for feature
+    for item in data:
+        if item[f[0]] is f[1]:
+            left.append(item)
+            l_data += 1
         else:
-            pos_data.append(mushroom)
-            pos_total += 1
+            right.append(item)
+            r_data += 1
 
-    pos_prob = pos_total / len(data)
-    neg_prob = neg_total / len(data)
+    # calculate probability
+    l_prob = l_data / len(data)
+    r_prob = r_data / len(data)
 
     # information gain equation
-    return entropy(data) - neg_prob * entropy(neg_data) - pos_prob * entropy(pos_data)
+    return entropy(data) - r_prob * entropy(right) - l_prob * entropy(left)
 
 
 def entropy(data):
 
-    # total of edible and positive mushroom
+    # total of positive and negative items
     pos_total = 0.0
     neg_total = 0.0
 
-    for mushroom in data:
-        if mushroom[0] is 'e':
+    # tally item types (pos/neg)
+    for item in data:
+        if item[0] is POS_CLASS:
             pos_total += 1
         else:
             neg_total += 1
 
+    # calculate probability (w/ smoothing)
     pos_prob = (pos_total + 1) / (len(data) + 2)
     neg_prob = (neg_total + 1) / (len(data) + 2)
 
@@ -78,51 +82,49 @@ def print_tree(node, prefix=''):
 
 
 def id3(data, features, MIN_GAIN=0.1):
-    node = DtNode
+    f_val = FeatureVal
 
-    # TODO: implement decision tree learning
-    node.fVal = namedtuple("FeatureVal", "feature, value")
-    node.nPosNeg = [0, 0]
+    nPosNeg = [0, 0]
+    item_base = [0, 0]
 
     # maximum information gain
-    node.gain = 0.0
+    gain = 0.0
 
     # left and right DTNodes
-    node.left = []
-    node.right = []
+    left = []
+    right = []
 
     # find feature of the highest information gain
     for f in features:
         info_gain = information_gain(data, f)
-        if node.gain < info_gain:
-            node.gain = info_gain
-            node.fVal = f
+        if gain < info_gain:
+            gain = info_gain
+            f_val = f
 
-    # check if info gain is less than threshold
-    # entropy should naturally handle all cases
-    # no need to increase entropy after split if all edible or all poisonous
-    # set min info gain to zero --> grow whole tree
-    # entropy below threshold? return leaf node
-
-    if node.gain < MIN_GAIN:
-        return DtNode(node.fVal[1], node.nPosNeg, node.gain, None, None)
-    else:
-        for mushroom in data:
-            if mushroom[node.fVal[0]] is node.fVal[1]:
-                node.left.append(mushroom)
-                node.nPosNeg[0] += 1
+    # base case for when information gain reaches minimum threshold
+    if gain <= MIN_GAIN:
+        for item in data:
+            if item[0] is POS_CLASS:
+                item_base[0] += 1
             else:
-                node.right.append(mushroom)
-                node.nPosNeg[1] += 1
+                item_base[1] += 1
+        return DtNode(f_val, item_base, gain, None, None)
 
-    return DtNode(node.fVal[1], node.nPosNeg, node.gain, id3(node.left, features, MIN_GAIN),
-                  id3(node.right, features, MIN_GAIN))
+    for item in data:
+        if item[f_val[0]] is f_val[1]:
+            left.append(item)
+            nPosNeg[0] += 1
+        else:
+            right.append(item)
+            nPosNeg[1] += 1
+
+    return DtNode(f_val, nPosNeg, gain, id3(left, features, MIN_GAIN),
+                  id3(right, features, MIN_GAIN))
 
 
 if __name__ == "__main__":
     train = MushroomData(sys.argv[1])
     dev = MushroomData(sys.argv[2])
-
     dTree = id3(train.data, train.features, MIN_GAIN=float(sys.argv[3]))
     
     print_tree(dTree)

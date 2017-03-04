@@ -1,4 +1,4 @@
-# mushroom-classifier
+# mushroom-classifier (Iterative Dichotomiser 3)
 
 ## Background
 <i>Implementation of the [ID3 decision tree learning algorithm](https://en.wikipedia.org/wiki/ID3_algorithm) as applied to a data set of edible and poisonous mushrooms.</i>
